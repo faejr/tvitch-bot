@@ -1,0 +1,7 @@
+debug = true
+prefix = "!"
+
+[twitch]
+username = "ExampleBot"
+token = ""
+channels = ["#example"]
