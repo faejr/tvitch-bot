@@ -1,6 +1,5 @@
 module commands
 
-import term
 import twitch_client { Client, CommandEvent }
 
 struct BishuCommand {
@@ -17,6 +16,6 @@ fn (c BishuCommand) test(event &CommandEvent) bool {
 
 fn (c BishuCommand) run(mut client Client, event &CommandEvent) {
 	client.send_channel_message(event.channel, 'the man the myth the legend') or {
-		println(term.red('failed sending message'))
+		client.logger.error('failed sending message')
 	}
 }

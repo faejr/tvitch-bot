@@ -1,34 +1,46 @@
 module main
 
 import os
-import configurator
-import twitch_client { Client, CommandEvent, MessageEvent }
-import commands
+import log
+import v.vmod
 
-interface Command {
-	name string
-	test(event &CommandEvent) bool
-	run(mut client Client, event &CommandEvent)
-}
+import configurator
+import twitch_client { CommandEvent, MessageEvent }
+import commands
 
 type ClientState = State
 
 struct State {
 mut:
-	commands []Command
+	commands []commands.Command
 }
 
 fn main() {
-	mut state := State{[]}
+	vm := vmod.decode( @VMOD_FILE ) or { panic(err.msg) }
+
+	mut state := State{
+		[]
+	}
 	state.commands << commands.new_ping_command()
 	state.commands << commands.new_bishu_command()
 	config_path := os.real_path(os.join_path(os.dir(@FILE), 'config.toml'))
 	config := configurator.load(config_path) ?
 
-	mut client := twitch_client.new(config, state) ?
+	mut l := log.Log{}
+	l.set_level(.info)
+	if config.debug {
+		l.set_level(.debug)
+	}
+	log_path := os.real_path(os.join_path(os.dir(@FILE), vm.name + '.log'))
+	l.set_full_logpath(log_path)
+	l.log_to_console_too()
+
+	l.info('$vm.name $vm.version - $vm.description')
+
+	mut client := twitch_client.new(config, l, state) ?
 	client.on_message(message_handler)
 	client.on_command(command_handler)
-	println('Press Ctrl-C to exit')
+	client.logger.info('Press Ctrl-C to exit')
 	client.run() ?
 }
 
@@ -44,9 +56,10 @@ fn command_handler(receiver voidptr, event &CommandEvent, sender voidptr) {
 }
 
 fn message_handler(receiver voidptr, event &MessageEvent, sender voidptr) {
+	mut client := event.client
 	message := event.message
 	username := message.source.split_nth('!', 2)[0]
 	channel := message.parameters[0]
 
-	println('[$channel] <$username>: $message.trailing')
+	client.logger.info('[$channel] <$username>: $message.trailing')
 }

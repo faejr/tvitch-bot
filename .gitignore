@@ -8,3 +8,4 @@ tvitch-bot
 *.dll
 vls.log
 config.toml
+*.log

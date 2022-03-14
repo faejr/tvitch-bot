@@ -1,6 +1,5 @@
 module commands
 
-import term
 import twitch_client { Client, CommandEvent }
 
 struct PingCommand {
@@ -17,6 +16,6 @@ fn (c PingCommand) test(event &CommandEvent) bool {
 
 fn (c PingCommand) run(mut client Client, event &CommandEvent) {
 	client.send_channel_message(event.channel, 'pong') or {
-		println(term.red('failed sending message'))
+		client.logger.error('failed sending message')
 	}
 }
