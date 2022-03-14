@@ -28,10 +28,6 @@ pub:
 	client   &Client
 }
 
-struct State<T> {
-	t T
-}
-
 pub struct Client {
 pub:
 	config Config
