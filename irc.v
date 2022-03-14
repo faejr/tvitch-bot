@@ -1,6 +1,6 @@
 module irc
 
-struct Message {
+pub struct Message {
 pub:
 	raw        string
 	source     string

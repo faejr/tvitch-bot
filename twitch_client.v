@@ -28,17 +28,23 @@ pub:
 	client   &Client
 }
 
-struct Client {
+struct State<T> {
+	t T
+}
+
+pub struct Client {
 pub:
 	config Config
+	state  voidptr
 mut:
 	websocket_client &websocket.Client
 	events           &eventbus.EventBus
 }
 
-pub fn new(config Config) ?&Client {
+pub fn new(config Config, state voidptr) ?&Client {
 	mut client := &Client{
 		config: config
+		state: state
 		websocket_client: websocket.new_client(twitch_client.twitch_wss_server) ?
 		events: eventbus.new()
 	}
@@ -90,7 +96,7 @@ pub fn (mut client Client) run() ? {
 							e)
 					}
 				} else if client.config.debug {
-					println(term.blue('unhandled message: $parsed_message'))
+					println(term.blue('> $parsed_message.raw'))
 				}
 			}
 		}
@@ -122,10 +128,14 @@ fn get_command_event(client Client, message irc.Message) &CommandEvent {
 }
 
 pub fn (mut client Client) send_channel_message(channel string, message string) ? {
-	client.websocket_client.write_string('PRIVMSG $channel $message') ?
+	privmsg := 'PRIVMSG $channel :$message'
+	if client.config.debug {
+		println(term.blue('< $privmsg'))
+	}
+	client.websocket_client.write_string(privmsg) ?
 }
 
-pub fn (mut client Client) on_message(handler fn (receiver voidptr, e &MessageEvent, sender voidptr)) {
+pub fn (mut client Client) on_message(handler fn (	receiver voidptr, e &MessageEvent, sender voidptr)) {
 	client.events.subscriber.subscribe(twitch_client.message_event_name, handler)
 }
 
