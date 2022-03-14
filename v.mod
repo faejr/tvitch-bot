@@ -1,5 +1,5 @@
 Module {
-	name: 'v-twitch-bot'
+	name: 'tvitch-bot'
 	description: ''
 	version: ''
 	license: ''
