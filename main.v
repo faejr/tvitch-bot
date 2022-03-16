@@ -19,10 +19,8 @@ fn main() {
 	vm := vmod.decode( @VMOD_FILE ) or { panic(err.msg) }
 
 	mut state := State{
-		[]
+		commands.get_commands()
 	}
-	state.commands << commands.new_ping_command()
-	state.commands << commands.new_bishu_command()
 	config_path := os.real_path(os.join_path(os.dir(@FILE), 'config.toml'))
 	config := configurator.load(config_path) ?
 

@@ -3,11 +3,7 @@ module commands
 import twitch_client { Client, CommandEvent }
 
 struct PingCommand {
-	name string
-}
-
-pub fn new_ping_command() PingCommand {
-	return PingCommand{'ping'}
+	name string = 'ping'
 }
 
 fn (c PingCommand) test(event &CommandEvent) bool {

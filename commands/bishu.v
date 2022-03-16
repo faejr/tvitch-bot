@@ -3,11 +3,7 @@ module commands
 import twitch_client { Client, CommandEvent }
 
 struct BishuCommand {
-	name string
-}
-
-pub fn new_bishu_command() BishuCommand {
-	return BishuCommand{'bishu'}
+	name string = 'bishu'
 }
 
 fn (c BishuCommand) test(event &CommandEvent) bool {

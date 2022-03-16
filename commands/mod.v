@@ -8,10 +8,9 @@ interface Command {
 	run(mut client Client, event &CommandEvent)
 }
 
-fn get_commands() []Command {
-	mut commands := []Command{}
-	commands << new_ping_command()
-	commands << new_bishu_command()
-
-	return commands
+pub fn get_commands() []Command {
+	return [
+		BishuCommand{},
+		PingCommand{}
+	]
 }
