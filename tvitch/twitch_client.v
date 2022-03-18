@@ -1,11 +1,9 @@
-module twitch_client
+module tvitch
 
 import net.websocket
 import log
 
 import eventbus
-import configurator { Config }
-import irc
 
 const (
 	twitch_wss_server  = 'wss://irc-ws.chat.twitch.tv:443'
@@ -15,7 +13,7 @@ const (
 
 pub struct MessageEvent {
 pub:
-	message &irc.Message
+	message &Message
 	client  &Client
 }
 
@@ -25,7 +23,7 @@ pub:
 	args     []string
 	channel  string
 	username string
-	message  &irc.Message
+	message  &Message
 	client   &Client
 }
 
@@ -45,7 +43,7 @@ pub fn new(config Config, logger log.Log, state voidptr) ?&Client {
 		config: config
 		state: state
 		logger: logger
-		websocket_client: websocket.new_client(twitch_client.twitch_wss_server) ?
+		websocket_client: websocket.new_client(tvitch.twitch_wss_server) ?
 		events: eventbus.new()
 	}
 
@@ -80,24 +78,24 @@ pub fn (mut client Client) run() ? {
 		}
 		messages := msg.payload.bytestr().split_into_lines()
 		for message in messages {
-			parsed_message := irc.parse_message(message)
+			parsed_message := parse_irc_message(message)
 			match parsed_message.command {
 				'PING' {
 					ws.write_string('PONG :' + parsed_message.trailing) ?
 				}
 				'PRIVMSG' {
-					if client.events.has_subscriber(twitch_client.message_event_name) {
+					if client.events.has_subscriber(tvitch.message_event_name) {
 						e := &MessageEvent{
 							client: &client
 							message: &parsed_message
 						}
-						client.events.publish(twitch_client.message_event_name, &msg,
+						client.events.publish(tvitch.message_event_name, &msg,
 							e)
 					}
-					if client.events.has_subscriber(twitch_client.command_event_name)
+					if client.events.has_subscriber(tvitch.command_event_name)
 						&& parsed_message.trailing[0..1] == client.config.prefix {
 						e := get_command_event(client, parsed_message)
-						client.events.publish(twitch_client.command_event_name, &msg,
+						client.events.publish(tvitch.command_event_name, &msg,
 							e)
 					}
 				}
@@ -118,7 +116,7 @@ pub fn (mut client Client) run() ? {
 	}
 }
 
-fn get_command_event(client Client, message irc.Message) &CommandEvent {
+fn get_command_event(client Client, message Message) &CommandEvent {
 	mut command_args := message.trailing.substr(client.config.prefix.len, message.trailing.len).split(' ')
 	command := command_args[0]
 	command_args.delete(0)
@@ -140,11 +138,11 @@ pub fn (mut client Client) send_channel_message(channel string, message string) 
 }
 
 pub fn (mut client Client) on_message(handler fn (receiver voidptr, e &MessageEvent, sender voidptr)) {
-	client.events.subscriber.subscribe(twitch_client.message_event_name, handler)
+	client.events.subscriber.subscribe(tvitch.message_event_name, handler)
 }
 
 pub fn (mut client Client) on_command(handler fn (receiver voidptr, e &CommandEvent, sender voidptr)) {
-	client.events.subscriber.subscribe(twitch_client.command_event_name, handler)
+	client.events.subscriber.subscribe(tvitch.command_event_name, handler)
 }
 
 pub fn (mut client Client) on_error(handler fn (receiver voidptr, e &MessageEvent, sender voidptr)) {

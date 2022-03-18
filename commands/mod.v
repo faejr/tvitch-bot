@@ -1,6 +1,6 @@
 module commands
 
-import twitch_client { Client, CommandEvent }
+import tvitch { Client, CommandEvent }
 
 interface Command {
 	name string

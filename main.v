@@ -4,8 +4,7 @@ import os
 import log
 import v.vmod
 
-import configurator
-import twitch_client { CommandEvent, MessageEvent }
+import tvitch { CommandEvent, MessageEvent }
 import commands
 
 type ClientState = State
@@ -22,7 +21,7 @@ fn main() {
 		commands.get_commands()
 	}
 	config_path := os.real_path(os.join_path(os.dir(@FILE), 'config.toml'))
-	config := configurator.load(config_path) ?
+	config := tvitch.load_config(config_path) ?
 
 	mut l := log.Log{}
 	l.set_level(.info)
@@ -35,7 +34,7 @@ fn main() {
 
 	l.info('$vm.name $vm.version - $vm.description')
 
-	mut client := twitch_client.new(config, l, state) ?
+	mut client := tvitch.new(config, l, state) ?
 	client.on_message(message_handler)
 	client.on_command(command_handler)
 	client.logger.info('Press Ctrl-C to exit')

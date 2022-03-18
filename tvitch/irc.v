@@ -1,4 +1,4 @@
-module irc
+module tvitch
 
 pub struct Message {
 pub:
@@ -10,7 +10,7 @@ pub:
 	tags       map[string]string
 }
 
-pub fn parse_message(message string) Message {
+pub fn parse_irc_message(message string) Message {
 	mut parameters := []string{}
 	mut trailing := ''
 	mut tags := map[string]string{}
